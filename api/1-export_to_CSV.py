@@ -1,51 +1,55 @@
 #!/usr/bin/python3
 """
-    python script that exports data in the CSV format
+Python script that exports data in the CSV format
 """
 import csv
 import json
 import requests
 from sys import argv
 
-
 if __name__ == "__main__":
     """
-        request user info by employee ID
+    Request user info by employee ID
     """
     request_employee = requests.get(
-        'https://jsonplaceholder.typicode.com/users/{}/'.format(argv[1]))
+        'https://jsonplaceholder.typicode.com/users/{}'.format(argv[1])
+    )
+    
     """
-        convert json to dictionary
+    Convert json to dictionary
     """
     user = json.loads(request_employee.text)
+    
     """
-        extract username
+    Extract username
     """
     username = user.get("username")
-
+    
     """
-        request user's TODO list
+    Request user's TODO list
     """
     request_todos = requests.get(
-        'https://jsonplaceholder.typicode.com/users/{}/todos'.format(argv[1]))
+        'https://jsonplaceholder.typicode.com/todos?userId={}'.format(argv[1])
+    )
+    
     """
-        dictionary to store task status(completed) in boolean format
-    """
-    tasks = {}
-    """
-        convert json to list of dictionaries
+    Convert json to list of dictionaries
     """
     user_todos = json.loads(request_todos.text)
+    
     """
-        loop through dictionary & get completed tasks
+    Export to CSV
     """
-    for dictionary in user_todos:
-        tasks.update({dictionary.get("title"): dictionary.get("completed")})
-
-    """
-        export to CSV
-    """
-    with open('{}.csv'.format(argv[1]), mode='w') as file:
+    with open('{}.csv'.format(argv[1]), mode='w', newline='') as file:
         file_editor = csv.writer(file, delimiter=',', quoting=csv.QUOTE_ALL)
-        for k, v in tasks.items():
-            file_editor.writerow([argv[1], username, v, k])
+        
+        """
+        Loop through todos and write each task as a row
+        """
+        for todo in user_todos:
+            file_editor.writerow([
+                argv[1],  # User ID
+                username,  # Username
+                str(todo.get("completed")).lower(),  # Task status (true/false)
+                todo.get("title")  # Task title
+            ])
