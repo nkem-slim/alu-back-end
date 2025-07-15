@@ -25,7 +25,7 @@ if __name__ == "__main__":
         request user's TODO list
     """
     request_todos = requests.get(
-        'https://jsonplaceholder.typicode.com/users/{}/todos'.format(argv[1]))
+        'https://jsonplaceholder.typicode.com/todos?userId={}'.format(argv[1]))
     """
         dictionary to store task status(completed) in boolean format
     """
