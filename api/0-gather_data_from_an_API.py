@@ -1,33 +1,28 @@
 #!/usr/bin/python3
-
-"""This module downloads from an API (JSONPlaceholder) and prints the data."""
+""" Import libraries """
 
 import requests
 import sys
 
+"""Gathering data from an API """
+
 if __name__ == "__main__":
-    employer_number = sys.argv[1]
-    raw_user_data = requests.get(
-        f"https://jsonplaceholder.typicode.com/users?id={employer_number}")
-    raw_todo_data = requests.get(
-        f"https://jsonplaceholder.typicode.com/todos?userId={employer_number}")
+    employee_id = sys.argv[1]
+    url = "https://jsonplaceholder.typicode.com/users/{}".format(employee_id)
 
-    if raw_todo_data.status_code != 200 or raw_user_data.status_code != 200:
-        print("Error: Failed to retrieve data from API.")
-        sys.exit(1)
+    todo = "https://jsonplaceholder.typicode.com/todos?userId={}"
+    todo = todo.format(employee_id)
 
-    user_json = raw_user_data.json()
-    todo_json = raw_todo_data.json()
+    user_info = requests.request("GET", url).json()
 
-    if not user_json:
-        print(f"Error: No user found with ID {employer_number}")
-        sys.exit(1)
+    todo_info = requests.request("GET", todo).json()
 
-    user_name = user_json[0]["name"]
-    todo_done = [x for x in todo_json if x['completed'] is True]
-    print(
-        "Employee {} is done with tasks({}/{}):"
-        .format(user_name, len(todo_done), len(todo_json))
-    )
-    for todo in todo_done:
-        print(f"\t {todo['title']}")
+    employee_name = user_info.get("name")
+    total_tasks = list(filter(lambda x: (x["completed"] is True), todo_info))
+    task_com = len(total_tasks)
+    total_task_done = len(todo_info)
+
+    print("Employee {} is done with tasks({}/{}):".format(employee_name,
+          task_com, total_task_done))
+
+    [print("\t {}".format(task.get("title"))) for task in total_tasks]
